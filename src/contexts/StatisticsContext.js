@@ -147,7 +147,7 @@ export const StatisticsProvider = ({ children }) => {
             const tronWeb = window.tron.tronWeb;
             
             const escrows_ = await getEscrows(tronWeb);
-            escrows.sort((a, b) => a.id - b.id);
+            escrows_.sort((a, b) => a.usdtAmount - b.usdtAmount);
             if (escrows_.length != escrows.length) {
                 setEscrows(escrows_);
             }
