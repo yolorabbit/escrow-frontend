@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { useWallet } from '@tronweb3/tronwallet-adapter-react-hooks';
 import { USDT_ADDRESS, ESCROW_ADDRESS } from '../constants';
 import MockERC20ABI from '../abi/MockERC20.json';
@@ -15,6 +15,10 @@ export const StatisticsProvider = ({ children }) => {
         escrowBalance: 0
     });
     const [escrows, setEscrows] = useState([]);
+    
+    // Add refs for timeouts
+    const statisticsTimeoutRef = useRef(null);
+    const escrowsTimeoutRef = useRef(null);
 
     const { connected, wallet, address } = useWallet();
 
@@ -117,6 +121,7 @@ export const StatisticsProvider = ({ children }) => {
                 getPlatformFee(tronWeb),
                 getEscrowContractBalance(tronWeb)
             ]);
+            
             if (usdtBalance != statistics.usdtBalance ||
                 accumulatedFees != statistics.accumulatedFees ||
                 escrowCount != statistics.escrowCount ||
@@ -131,6 +136,9 @@ export const StatisticsProvider = ({ children }) => {
                     escrowBalance
                 });
             }
+
+            // Schedule next update
+            statisticsTimeoutRef.current = setTimeout(fetchAllStatistics, 3000);
         }
     };
 
@@ -139,34 +147,43 @@ export const StatisticsProvider = ({ children }) => {
             const tronWeb = window.tron.tronWeb;
             
             const escrows_ = await getEscrows(tronWeb);
-            if (escrows_.length != escrows.length)  
-            {
+            if (escrows_.length != escrows.length) {
                 setEscrows(escrows_);
             }
+
+            // Schedule next update
+            escrowsTimeoutRef.current = setTimeout(fetchEscrows, 5000);
         }
     };
 
     useEffect(() => {
+        // Start fetching statistics
         fetchAllStatistics();
         
-        // Optional: Set up an interval to refresh statistics
-        const interval = setInterval(fetchAllStatistics, 3000); // every 3 seconds
-        
-        return () => clearInterval(interval);
+        // Cleanup function
+        return () => {
+            if (statisticsTimeoutRef.current) {
+                clearTimeout(statisticsTimeoutRef.current);
+            }
+        };
     }, [connected, wallet]);
 
     useEffect(() => {
+        // Start fetching escrows
         fetchEscrows();
         
-        // Optional: Set up an interval to refresh statistics
-        const interval = setInterval(fetchAllStatistics, 5000); // every 3 seconds
-        
-        return () => clearInterval(interval);
+        // Cleanup function
+        return () => {
+            if (escrowsTimeoutRef.current) {
+                clearTimeout(escrowsTimeoutRef.current);
+            }
+        };
     }, [connected, wallet]);
 
     return (
         <StatisticsContext.Provider value={{ 
-            statistics, escrows,
+            statistics, 
+            escrows,
             refreshStatistics: fetchAllStatistics
         }}>
             {children}
