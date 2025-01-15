@@ -61,11 +61,11 @@ export const StatisticsProvider = ({ children }) => {
             const contract = await tronWeb.contract(EscrowABI, ESCROW_ADDRESS);
             const count = await contract.methods.escrowCount().call();
             const iCount = parseInt(count.toString());
-            const funcEscrows = []
+            const escrows = []
             for (let i = 0; i < iCount; i ++) {
-                funcEscrows.push(contract.escrows(i).call());
+                const escrow = await contract.escrows(i).call();
+                escrows.push(escrow);
             }
-            const escrows = await Promise.all(funcEscrows);
             const transactions = escrows.map((item) => {
                 return {
                     seller: tronWeb.address.fromHex(item.seller),
@@ -147,12 +147,13 @@ export const StatisticsProvider = ({ children }) => {
             const tronWeb = window.tron.tronWeb;
             
             const escrows_ = await getEscrows(tronWeb);
+            escrows.sort((a, b) => a.id - b.id);
             if (escrows_.length != escrows.length) {
                 setEscrows(escrows_);
             }
 
             // Schedule next update
-            escrowsTimeoutRef.current = setTimeout(fetchEscrows, 5000);
+            escrowsTimeoutRef.current = setTimeout(fetchEscrows, 6000);
         }
     };
 
