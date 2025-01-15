@@ -220,16 +220,7 @@
                 width: 100%;
                 justify-content: flex-end;
 
-                @media (min-width: 1400px) {
-                    &.mobile {
-                        display: none;
-                    }
-                }
-
                 @media (max-width: 1400px) {
-                    &.desktop {
-                        display: none;
-                    }
                     margin-top: 10px;
                 }
 

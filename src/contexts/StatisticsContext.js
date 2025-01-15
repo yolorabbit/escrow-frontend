@@ -16,10 +16,6 @@ export const StatisticsProvider = ({ children }) => {
     });
     const [escrows, setEscrows] = useState([]);
     
-    // Add refs for timeouts
-    const statisticsTimeoutRef = useRef(null);
-    const escrowsTimeoutRef = useRef(null);
-
     const { connected, wallet, address } = useWallet();
 
     const getUSDTBalance = async (tronWeb, address) => {
@@ -122,23 +118,13 @@ export const StatisticsProvider = ({ children }) => {
                 getEscrowContractBalance(tronWeb)
             ]);
             
-            if (usdtBalance != statistics.usdtBalance ||
-                accumulatedFees != statistics.accumulatedFees ||
-                escrowCount != statistics.escrowCount ||
-                platformFee != statistics.platformFee ||
-                escrowBalance != statistics.escrowBalance 
-            ) {
-                setStatistics({
-                    usdtBalance,
-                    accumulatedFees,
-                    escrowCount,
-                    platformFee,
-                    escrowBalance
-                });
-            }
-
-            // Schedule next update
-            statisticsTimeoutRef.current = setTimeout(fetchAllStatistics, 10000);
+            setStatistics({
+                usdtBalance,
+                accumulatedFees,
+                escrowCount,
+                platformFee,
+                escrowBalance
+            });
         }
     };
 
@@ -148,44 +134,28 @@ export const StatisticsProvider = ({ children }) => {
             
             const escrows_ = await getEscrows(tronWeb);
             escrows_.sort((a, b) => a.usdtAmount - b.usdtAmount);
-            if (escrows_.length != escrows.length) {
-                setEscrows(escrows_);
-            }
-
-            // Schedule next update
-            escrowsTimeoutRef.current = setTimeout(fetchEscrows, 10000);
+            setEscrows(escrows_);
         }
     };
 
-    useEffect(() => {
-        // Start fetching statistics
-        fetchAllStatistics();
-        
-        // Cleanup function
-        return () => {
-            if (statisticsTimeoutRef.current) {
-                clearTimeout(statisticsTimeoutRef.current);
-            }
-        };
-    }, [connected, wallet]);
+    const refreshAll = async () => {
+        await Promise.all([
+            fetchAllStatistics(),
+            fetchEscrows()
+        ]);
+    };
 
     useEffect(() => {
-        // Start fetching escrows
-        fetchEscrows();
-        
-        // Cleanup function
-        return () => {
-            if (escrowsTimeoutRef.current) {
-                clearTimeout(escrowsTimeoutRef.current);
-            }
-        };
-    }, [connected, wallet]);
+        if (connected && wallet && address) {
+            refreshAll();
+        }
+    }, [connected, wallet, address]);
 
     return (
         <StatisticsContext.Provider value={{ 
             statistics, 
             escrows,
-            refreshStatistics: fetchAllStatistics
+            refreshAll
         }}>
             {children}
         </StatisticsContext.Provider>
