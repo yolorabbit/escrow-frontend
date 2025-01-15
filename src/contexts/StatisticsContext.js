@@ -129,11 +129,11 @@ export const StatisticsProvider = ({ children }) => {
                 escrowBalance != statistics.escrowBalance 
             ) {
                 setStatistics({
-                    usdtBalance,
-                    accumulatedFees,
-                    escrowCount,
-                    platformFee,
-                    escrowBalance
+                    usdtBalance: usdtBalance == 0? statistics.usdtBalance: usdtBalance,
+                    accumulatedFees: accumulatedFees == 0? statistics.accumulatedFees: accumulatedFees,
+                    escrowCount: escrowCount == 0? statistics.escrowCount: escrowCount,
+                    platformFee: platformFee == 0? statistics.platformFee: platformFee,
+                    escrowBalance: escrowBalance == 0? statistics.escrowBalance: escrowBalance
                 });
             }
 
@@ -147,7 +147,7 @@ export const StatisticsProvider = ({ children }) => {
             const tronWeb = window.tron.tronWeb;
             
             const escrows_ = await getEscrows(tronWeb);
-            if (escrows_.length != escrows.length) {
+            if (escrows_.length != escrows.length && escrows_.length > 0) {
                 setEscrows(escrows_);
             }
 
