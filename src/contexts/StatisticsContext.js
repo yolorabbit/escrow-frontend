@@ -138,7 +138,7 @@ export const StatisticsProvider = ({ children }) => {
             }
 
             // Schedule next update
-            statisticsTimeoutRef.current = setTimeout(fetchAllStatistics, 3000);
+            statisticsTimeoutRef.current = setTimeout(fetchAllStatistics, 10000);
         }
     };
 
@@ -153,7 +153,7 @@ export const StatisticsProvider = ({ children }) => {
             }
 
             // Schedule next update
-            escrowsTimeoutRef.current = setTimeout(fetchEscrows, 6000);
+            escrowsTimeoutRef.current = setTimeout(fetchEscrows, 10000);
         }
     };
 
