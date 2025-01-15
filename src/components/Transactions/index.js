@@ -7,8 +7,6 @@ import './index.scss'
 
 const Transactions = () => {
     const { escrows } = useStatistics();
-    const transactions = escrows? escrows : [];
-    console.log(transactions);
 
     return (
         <div className='transactions-container'>
@@ -24,7 +22,7 @@ const Transactions = () => {
                             <span className='header-cell' key={index}><strong>{headerText}</strong></span>
                         ))}
                         {
-                            transactions.reverse().map((rowData, index) => {
+                            escrows.map((rowData, index) => {
                                 return (
                                     <React.Fragment key={index}>
                                         <span className='cell seller' key={`a-${index}`}>{rowData.seller}</span>
